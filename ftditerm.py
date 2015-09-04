@@ -1,5 +1,9 @@
 #!/usr/local/opt/python/bin/python2.7
 
+# FTDITerm, a terminal for the FTDI direct driver.
+# (C)2015 Ian Hartwig <ihartwig@github>
+
+# Built on top of miniterm.py:
 # Very simple serial terminal
 # (C)2002-2011 Chris Liechti <cliechti@gmx.net>
 
@@ -8,11 +12,8 @@
 # repr, useful for debug purposes)
 
 
-import sys, os, serial, threading
-try:
-    from serial.tools.list_ports import comports
-except ImportError:
-    comports = None
+import sys, os, threading
+import pyserial_glue as serial
 
 EXITCHARCTER = serial.to_bytes([0x1d])   # GS/CTRL+]
 MENUCHARACTER = serial.to_bytes([0x14])  # Menu: CTRL+T
@@ -167,12 +168,15 @@ REPR_MODES = ('raw', 'some control', 'all control', 'hex')
 
 class Miniterm(object):
     def __init__(self, port, baudrate, parity, rtscts, xonxoff, echo=False, convert_outgoing=CONVERT_CRLF, repr_mode=0):
-        try:
-            self.serial = serial.serial_for_url(port, baudrate, parity=parity, rtscts=rtscts, xonxoff=xonxoff, timeout=1)
-        except AttributeError:
-            # happens when the installed pyserial is older than 2.5. use the
-            # Serial class directly then.
-            self.serial = serial.Serial(port, baudrate, parity=parity, rtscts=rtscts, xonxoff=xonxoff, timeout=1)
+        # try:
+        #     self.serial = serial.serial_for_url(port, baudrate, parity=parity, rtscts=rtscts, xonxoff=xonxoff, timeout=1)
+        # except AttributeError:
+        #     # happens when the installed pyserial is older than 2.5. use the
+        #     # Serial class directly then.
+        #     self.serial = serial.Serial(port, baudrate, parity=parity, rtscts=rtscts, xonxoff=xonxoff, timeout=1)
+
+        self.serial = serial.FTDISerial(port, baudrate, parity=parity, rtscts=rtscts, xonxoff=xonxoff, timeout=1)
+
         self.echo = echo
         self.repr_mode = repr_mode
         self.convert_outgoing = convert_outgoing
