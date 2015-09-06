@@ -1,4 +1,5 @@
 import pylibftdi
+pylibftdi.USB_VID_LIST.append(0x0000)
 
 # some constants from pyserial
 
@@ -115,8 +116,7 @@ class SerialBase(object):
         self.dsrdtr   = dsrdtr
         self.interCharTimeout = interCharTimeout
 
-        if port is not None:
-            self.open()
+        self.open()
 
     def isOpen(self):
         """Check if the port is opened."""
@@ -386,18 +386,24 @@ class FTDISerial(SerialBase):
     """
 
     def open(self):
-        print "opening ftdi device..."
+        if(self.port == None):
+            print "opening first available ftdi device..."
+        else:
+            print "opening ftdi device with serial %s" % self.port
+
         try:
-            self._ftdi_dev = pylibftdi.Device(mode='t', interface_select=pylibftdi.INTERFACE_B)
+            self._ftdi_dev = pylibftdi.Device(device_id=self.port, mode='t', interface_select=pylibftdi.INTERFACE_B)
         except:
             raise
+            
         self._reconfigurePort()
+        self._isOpen = True
 
     def _reconfigurePort(self):
         self._ftdi_dev.baudrate = self._baudrate
 
     def close(self):
-        pass
+        self._ftdi_dev.close()
 
     def read(self, size=1):
         """

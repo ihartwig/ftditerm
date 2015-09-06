@@ -1,4 +1,4 @@
-#!/usr/local/opt/python/bin/python2.7
+#!/usr/bin/env python
 
 # FTDITerm, a terminal for the FTDI direct driver.
 # (C)2015 Ian Hartwig <ihartwig@github>
@@ -148,14 +148,6 @@ elif os.name == 'posix':
 
 else:
     raise NotImplementedError("Sorry no implementation for your platform (%s) available." % sys.platform)
-
-
-def dump_port_list():
-    if comports:
-        sys.stderr.write('\n--- Available ports:\n')
-        for port, desc, hwid in sorted(comports()):
-            #~ sys.stderr.write('--- %-20s %s [%s]\n' % (port, desc, hwid))
-            sys.stderr.write('--- %-20s %s\n' % (port, desc))
 
 
 CONVERT_CRLF = 2
@@ -478,7 +470,7 @@ def main():
 
     group.add_option("-p", "--port",
         dest = "port",
-        help = "port, a number or a device name. (deprecated option, use parameter instead)",
+        help = "only connect to specified serial number FTDI. optional. if not provided the first FTDI found will be used.",
         default = DEFAULT_PORT
     )
 
@@ -629,11 +621,6 @@ def main():
             args.pop(0)
         if args:
             parser.error("too many arguments")
-    else:
-        # noport given on command line -> ask user now
-        if port is None:
-            dump_port_list()
-            port = raw_input('Enter port name:')
 
     convert_outgoing = CONVERT_CRLF
     if options.cr:
