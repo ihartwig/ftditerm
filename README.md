@@ -9,15 +9,28 @@ Depends on [pylibftdi](https://pypi.python.org/pypi/pylibftdi), which can be ins
 ## Usage
 
 ```
-% ./ftditerm.py -b 115200 -p asdf
-opening ftdi device...
---- Miniterm on asdf: 115200,8,N,1 ---
+% ./ftditerm.py -b 115200
+opening first available ftdi device...
+--- Miniterm on None: 115200,8,N,1 ---
 --- Quit: Ctrl+]  |  Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
-
-hello world
 hello world
 hello world
 
 --- exit ---
 ```
 
+On linux systems you may need to use `sudo` to access the usb device.
+
+Optionally, use the `-b`/`--baud ` flag to set the baud rate. If not specified, it defaults to 9600.
+
+Optionally, use the `-p`/`--port` flag to look for a specific FTDI serial number. If not specified, use the first one available.
+
+Use `--help` to see the full set of options available.
+
+## Reprogramming USB VID/PID
+
+On Windows/Mac systems the virtual comm port (VCP) driver automatically grab any USB device with the FTDI VID/PID (0x0403/0x6010 for FT2232), blocking access from libusb/libftdi. To prevent auto driver/kext loading we can set the VID to a reserved value (0x0000) and tell our libftdi tools to look for this VID instead. Note that this is not endorsed by USB-IF and should never be done to a production device.
+
+On Linux, just run the `ftdi_usb_program.py` script, probably with `sudo`. Change the `NEW_VID` and `NEW_PID` to your desired values.
+
+On Windows/Mac you will first need to disable the VCP driver. FTDI has documented this for Mac in an [application note (section 7.1)](http://www.ftdichip.com/Support/Documents/AppNotes/AN_134_FTDI_Drivers_Installation_Guide_for_MAC_OSX.pdf). Rename `/System/Library/Extensions/IOUSBFamily.kext/Contents/Plugins/AppleUSBFTDI.kext` to `AppleUSBFTDI.disabled` and reboot. OpenOCD on Windows provides a tool that lets the user change the driver per USB device. Once the VCP driver is disabled, the `ftdi_usb_program.py` script should run successfully. Change the `NEW_VID` and `NEW_PID` to your desired values.
